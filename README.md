@@ -20,26 +20,34 @@ luarocks install ftcsv
 
 
 ## Parsing
-### `ftcsv.parse(fileName, delimiter [, options])`
+### `ftcsv.parse(fileName, [, options])`
 
-ftcsv will load the entire csv file into memory, then parse it in one go, returning a lua table with the parsed data and a lua table containing the column headers. It has only two required parameters - a file name and delimiter (limited to one character). A few optional parameters can be passed in via a table (examples below).
+ftcsv will load the entire csv file into memory, then parse it in one go, returning a lua table with the parsed data and a lua table containing the column headers. It has only a file name parameter.  A few optional parameters can be passed in via a table (examples below).
 
 Just loading a csv file:
 ```lua
 local ftcsv = require('ftcsv')
-local zipcodes, headers = ftcsv.parse("free-zipcode-database.csv", ",")
+local zipcodes, headers = ftcsv.parse("free-zipcode-database.csv")
 ```
 
 ### Options
 The following are optional parameters passed in via the third argument as a table. For example if you wanted to `loadFromString` and not use `headers`, you could use the following:
 ```lua
-ftcsv.parse("apple,banana,carrot", ",", {loadFromString=true, headers=false})
+ftcsv.parse("apple,banana,carrot", {loadFromString=true, headers=false})
 ```
+
+ - `delimiter`
+
+ 	The default delimiter is `","` but you can set this to whatever you like but it is limited to one character.
+ 	```lua
+	ftcsv.parse("a|b|c\r\n1|2|3", {delimiter="|"})
+ 	```
+
  - `loadFromString`
 
  	If you want to load a csv from a string instead of a file, set `loadFromString` to `true` (default: `false`)
  	```lua
-	ftcsv.parse("a,b,c\r\n1,2,3", ",", {loadFromString=true})
+	ftcsv.parse("a,b,c\r\n1,2,3", {loadFromString=true})
  	```
 
  - `rename`
@@ -50,7 +58,7 @@ ftcsv.parse("apple,banana,carrot", ",", {loadFromString=true, headers=false})
 
  	```lua
  	local options = {loadFromString=true, rename={["a"] = "d", ["b"] = "e", ["c"] = "f"}}
-	local actual = ftcsv.parse("a,b,c\r\napple,banana,carrot", ",", options)
+	local actual = ftcsv.parse("a,b,c\r\napple,banana,carrot", options)
  	```
 
  - `fieldsToKeep`
@@ -61,7 +69,7 @@ ftcsv.parse("apple,banana,carrot", ",", {loadFromString=true, headers=false})
 
  	```lua
 	local options = {loadFromString=true, fieldsToKeep={"a","f"}, rename={["c"] = "f"}}
-	local actual = ftcsv.parse("a,b,c\r\napple,banana,carrot\r\n", ",", options)
+	local actual = ftcsv.parse("a,b,c\r\napple,banana,carrot\r\n", options)
  	```
 
  - `headerFunc`
@@ -71,7 +79,7 @@ ftcsv.parse("apple,banana,carrot", ",", {loadFromString=true, headers=false})
  	Ex: making all fields uppercase
  	```lua
  	local options = {loadFromString=true, headerFunc=string.upper}
-	local actual = ftcsv.parse("a,b,c\napple,banana,carrot", ",", options)
+	local actual = ftcsv.parse("a,b,c\napple,banana,carrot", options)
  	```
 
  - `headers`
@@ -79,15 +87,15 @@ ftcsv.parse("apple,banana,carrot", ",", {loadFromString=true, headers=false})
  	Set `headers` to `false` if the file you are reading doesn't have any headers. This will cause ftcsv to create indexed tables rather than a key-value tables for the output.
 
  	```lua
-	local options = {loadFromString=true, headers=false}
-	local actual = ftcsv.parse("apple>banana>carrot\ndiamond>emerald>pearl", ">", options)
+	local options = {loadFromString=true, headers=false, delimiter=">"}
+	local actual = ftcsv.parse("apple>banana>carrot\ndiamond>emerald>pearl", options)
  	```
 
  	Note: Header-less files can still use the `rename` option and after a field has been renamed, it can specified as a field to keep. The `rename` syntax changes a little bit:
 
  	```lua
-	local options = {loadFromString=true, headers=false, rename={"a","b","c"}, fieldsToKeep={"a","b"}}
-	local actual = ftcsv.parse("apple>banana>carrot\ndiamond>emerald>pearl", ">", options)
+	local options = {loadFromString=true, headers=false, rename={"a","b","c"}, fieldsToKeep={"a","b"}, delimiter=">"}
+	local actual = ftcsv.parse("apple>banana>carrot\ndiamond>emerald>pearl", options)
  	```
 
  	In the above example, the first field becomes 'a', the second field becomes 'b' and so on.
@@ -96,23 +104,31 @@ For all tested examples, take a look in /spec/feature_spec.lua and /spec/dynamic
 
 
 ## Encoding
-### `ftcsv.encode(inputTable, delimiter[, options])`
+### `ftcsv.encode(inputTable, [, options])`
 
-ftcsv can also take a lua table and turn it into a text string to be written to a file. It has two required parameters, an inputTable and a delimiter. You can use it to write out a file like this:
+ftcsv can also take a lua table and turn it into a text string to be written to a file. It has a required inputTable. You can use it to write out a file like this:
 ```lua
-local fileOutput = ftcsv.encode(users, ",")
+local fileOutput = ftcsv.encode(users)
 local file = assert(io.open("ALLUSERS.csv", "w"))
 file:write(fileOutput)
 file:close()
 ```
 
 ### Options
+
+ - `delimiter`
+
+ 	The default delimiter is `","` but you can set this to whatever you like but it is limited to one character.
+ 	```lua
+	local output = ftcsv.encode(someTable, {delimiter="-"})
+ 	```
+
  - `fieldsToKeep`
 
 	if `fieldsToKeep` is set in the encode process, only the fields specified will be written out to a file.
 
 	```lua
-	local output = ftcsv.encode(everyUser, ",", {fieldsToKeep={"Name", "Phone", "City"}})
+	local output = ftcsv.encode(everyUser, {fieldsToKeep={"Name", "Phone", "City"}})
 	```
 
 
