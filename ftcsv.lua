@@ -314,17 +314,22 @@ local function determineRealHeaders(headerField, fieldsToKeep)
 end
 
 -- runs the show!
-function ftcsv.parse(inputFile, delimiter, options)
-    -- delimiter MUST be one character
-    assert(#delimiter == 1 and type(delimiter) == "string", "the delimiter must be of string type and exactly one character")
-
+function ftcsv.parse(inputFile, options)
     -- OPTIONS yo
     local header = true
     local rename
     local fieldsToKeep = nil
     local loadFromString = false
     local headerFunc
+    local delimiter 
+
     if options then
+        if options.delimiter ~= then
+            -- delimiter MUST be one character
+            assert(#options.delimiter == 1 and type(options.delimiter) == "string", "the delimiter must be of string type and exactly one character")
+            delimiter = options.delimiter
+        end
+
         if options.headers ~= nil then
             assert(type(options.headers) == "boolean", "ftcsv only takes the boolean 'true' or 'false' for the optional parameter 'headers' (default 'true'). You passed in '" .. tostring(options.headers) .. "' of type '" .. type(options.headers) .. "'.")
             header = options.headers
@@ -355,6 +360,9 @@ function ftcsv.parse(inputFile, delimiter, options)
             headerFunc = options.headerFunc
         end
     end
+
+    -- delimiter is a comma by default
+    delimiter = delimiter or ","
 
     -- handle input via string or file!
     local inputString
@@ -482,15 +490,18 @@ end
 
 -- turns a lua table into a csv
 -- works really quickly with luajit-2.1, because table.concat life
-function ftcsv.encode(inputTable, delimiter, options)
+function ftcsv.encode(inputTable, options)
     local output = {}
-
-    -- dilimeter MUST be one character
-    assert(#delimiter == 1 and type(delimiter) == "string", "the delimiter must be of string type and exactly one character")
 
     -- grab the headers from the options if they are there
     local headers = nil
+    local delimiter
     if options then
+        if options.delimiter ~= nil then
+            -- dilimeter MUST be one character
+            assert(#options.delimiter == 1 and type(options.delimiter) == "string", "the delimiter must be of string type and exactly one character")
+            delimiter = options.delimiter
+        end
         if options.fieldsToKeep ~= nil then
             assert(type(options.fieldsToKeep) == "table", "ftcsv only takes in a list (as a table) for the optional parameter 'fieldsToKeep'. You passed in '" .. tostring(options.headers) .. "' of type '" .. type(options.headers) .. "'.")
             headers = options.fieldsToKeep
@@ -499,6 +510,9 @@ function ftcsv.encode(inputTable, delimiter, options)
     if headers == nil then
         headers = extractHeaders(inputTable)
     end
+
+    -- delimiter is a comma by default
+    delimiter = delimiter or ","
 
     -- newHeaders are needed if there are quotes within the header
     -- because they need to be escaped
