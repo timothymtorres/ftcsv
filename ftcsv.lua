@@ -324,7 +324,7 @@ function ftcsv.parse(inputFile, options)
     local delimiter 
 
     if options then
-        if options.delimiter ~= then
+        if options.delimiter ~= nil then
             -- delimiter MUST be one character
             assert(#options.delimiter == 1 and type(options.delimiter) == "string", "the delimiter must be of string type and exactly one character")
             delimiter = options.delimiter
