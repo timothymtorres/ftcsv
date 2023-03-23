@@ -1,3 +1,6 @@
+--- ftcsv is a fast CSV library written for Lua
+--- It's been tested with LuaJIT 2.0/2.1 and Lua 5.1, 5.2, 5.3, and 5.4
+-- @module ftcsv
 local ftcsv = {
     _VERSION = 'ftcsv 1.3.0',
     _DESCRIPTION = 'CSV library for Lua',
