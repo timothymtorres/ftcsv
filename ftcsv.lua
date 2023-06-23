@@ -1,6 +1,9 @@
 --- ftcsv is a fast CSV library written for Lua
 --- It's been tested with LuaJIT 2.0/2.1 and Lua 5.1, 5.2, 5.3, and 5.4
 -- @module ftcsv
+-- @author Shakil Thakur
+-- @license MIT
+-- @copyright Shakil Takur 2016-2023
 local ftcsv = {
     _VERSION = 'ftcsv 1.3.0',
     _DESCRIPTION = 'CSV library for Lua',
@@ -140,6 +143,21 @@ local function generateHeadersMetamethod(finalHeaders)
     rawSetup = rawSetup:format(table.concat(finalHeaders, "]] ]=true, [ [["))
     return luaCompatibility.load(rawSetup)
 end
+
+--- implicit table for options
+-- @table options implicit table for configuring parser options
+-- @bool loadFromString If you want to load a csv from a string instead of a file
+-- @table rename If you want to rename a field, you can set `rename` to change the field names.
+-- @table fieldsToKeep Keeps certain fields and discards the rest
+-- @bool ignoreQuotes If `ignoreQuotes` is `true`, it will leave all quotes in the final parsed output.
+-- @function headerFunc Applies a function to every field in the header. If you are using `rename`, 
+-- the function is applied after the rename
+-- @bool headers Set headers to false if the file you are reading doesn't have any headers. 
+-- This will cause ftcsv to create indexed tables rather than a key-value tables for the output.
+-- @table fieldsToKeep if `fieldsToKeep` is set in the encode process, only the fields 
+-- specified will be written out to a file.
+-- @bool onlyRequiredQuotes if onlyRequiredQuotes is set to true, the output will only include 
+-- quotes around fields that are quotes, have newlines, or contain the delimter.
 
 -- main function used to parse
 local function parseString(inputString, i, options)
@@ -540,7 +558,12 @@ local function parseHeadersAndSetupArgs(inputString, delimiter, options, fieldsT
     return endOfHeaders, parserArgs, finalHeaders
 end
 
--- runs the show!
+--- Reads a CSV file and splits it up into a table
+
+-- @string inputFile the path to the CSV file
+-- @table[opt] options a list of options for modifying the parse beavhior 
+-- @treturn table a table of strings
+-- @treturn finalHeaders ???
 function ftcsv.parse(inputFile, delimiter, options)
     local options, fieldsToKeep = parseOptions(delimiter, options, false)
 
